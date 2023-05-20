@@ -1,6 +1,6 @@
 import cv2  
 import numpy as np  
-
+#ensure that python version is running on 3.9.13
 #source: https://www.thepythoncode.com/article/hide-secret-data-in-images-using-steganography-python
 # converting types to binary  
 def toBinary(data):
@@ -104,9 +104,9 @@ def decode(img, bits):
     return decoded_data[:-5]
 
 if __name__ == "__main__":
-    input_image = "test.PNG"
+    input_image = "t.PNG"
     output_image = "encoded_image.PNG"
-    secret_data = "This is a top secret message....."
+    secret_data = "Sending secret message"
     # encode the data into the image
     encoded_image = encode(img=input_image, message=secret_data, bits = 1)
     # save the output image (encoded image)
