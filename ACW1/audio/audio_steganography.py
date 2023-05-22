@@ -5,6 +5,8 @@ import numpy as np
 import math
 
 # TODO: write comments & refactor naming.
+#       test out if the payload is too large, and dispaly error messaeg --> done
+#       try all the bit ranges, see can decode correctly anot --> done
 
 
 def roundup(x, base=1):
@@ -14,15 +16,13 @@ def roundup(x, base=1):
 byte_depth_to_dtype = {1: np.uint8, 2: np.uint16, 4: np.uint32, 8: np.uint64}
 
 
-def convert_audio_to_wav(input_file):
+def convert_audio_to_wav(input_path, output_path):
     try:
         # Load audio file
-        audio = AudioSegment.from_file(input_file)
+        audio = AudioSegment.from_file(input_path)
         # Convert it to WAV format (loseless audio format)
-        filename, extension = os.path.splitext(input_file)
-        output_file = filename + ".wav"
-        audio.export(output_file, format="wav")
-        return output_file
+        audio.export(output_path, format="wav")
+        return output_path
 
     except Exception as e:
         raise
@@ -107,12 +107,12 @@ def lsb_interleave_bytes(
     return ret if truncate else ret + carrier[byte_depth * bit_height :]
 
 
-def encode(audio_path, payload_path, num_lsb):
+def encode(audio_path, output_path, payload_path, num_lsb):
     print("\nEncoding Starts..")
     try:
         # Check if the file is MP3 or MP4 (lossly audio format)
         if audio_path.lower().endswith(".mp3") or audio_path.lower().endswith(".mp4"):
-            audio_path = convert_audio_to_wav(audio_path)
+            audio_path = convert_audio_to_wav(audio_path, output_path)
             if audio_path is None:
                 return
 
@@ -138,20 +138,13 @@ def encode(audio_path, payload_path, num_lsb):
             payload = file.read()
 
         if payload_size > max_bytes_to_hide:
-            required_lsb = math.ceil(payload_size * 8 / num_samples)
-            raise ValueError(
-                "Input file too large to hide, "
-                f"requires {required_lsb} LSBs, using {num_lsb}"
-            )
+            raise ValueError("Input file too large to hide")
 
         audio_frames = lsb_interleave_bytes(
             audio_frames, payload, num_lsb, extPayload, byte_depth=sample_width
         )
 
         print(f"{payload_size} bytes hidden")
-
-        file_name, extension = os.path.splitext(audio_path)
-        output_path = file_name + "_stego.wav"
 
         # Write bytes to a new wave audio file
         audio_steg = wave.open(output_path, "wb")
@@ -195,16 +188,16 @@ def decode(audio_path, output_path, num_lsb):
 if __name__ == "__main__":
     file_directory = "./files/"
 
-    input_audio_path = file_directory + "sample_2.mp4"
-    output_audio_path = file_directory + "sample_2_stego.wav"
-    payload_path = file_directory + "payload.txt"
+    input_audio_path = file_directory + "sample_3.wav"
+    output_audio_path = file_directory + "encode_stego.wav"
+    payload_path = file_directory + "payload_large.txt"
 
     try:
-        num_lbs = 6
-        while num_lbs > 5:
-            num_lbs = int(input("Please enter the number of LBS to replace (0-5): "))
-            if num_lbs <= 5:
-                encode(input_audio_path, payload_path, num_lbs)
+        num_lbs = 67
+        while num_lbs > 6:
+            num_lbs = int(input("Please enter the number of LBS to replace (1-6): "))
+            if num_lbs <= 6:
+                encode(input_audio_path, output_audio_path, payload_path, num_lbs)
                 decode(output_audio_path, payload_path, num_lbs)
     except Exception as e:
         print("Error:", str(e))
