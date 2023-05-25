@@ -3,21 +3,23 @@ import cv2
 from Utilities import read_file_content
 from tkinter import *
 from tkinter import ttk
+import imageio
 
 steg = imgSteg()
 
 if __name__ == "__main__":
-	input_image = "test.jpg"
+	input_image = "t.gif"
 	#standardize output to be png to prevent loss of metadata due to jpg utilizing lossless compression
-	output_image = "encoded_image.png"
+	output_image = "encoded_image.gif"
 	#secret_data = "test message"
 	secret_data_file = "t.docx"
+	numOfBit = 5
 	# encode the data into the image
-	encoded_image = steg.encode(img=input_image, message=read_file_content(secret_data_file), bits = 1)
+	encoded_image = steg.encode(img=input_image, message=read_file_content(secret_data_file), bits = numOfBit)
 	# save the output image (encoded image)
-	cv2.imwrite(output_image, encoded_image)
+	imageio.mimsave(output_image, encoded_image)
 	# decode the secret data from the image
-	decoded_data = steg.decode(output_image, bits = 1)
+	decoded_data = steg.decode(output_image, bits = numOfBit)
 	print("[+] Decoded data:", decoded_data)
 
 	root = Tk()
