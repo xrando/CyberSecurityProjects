@@ -5,7 +5,7 @@ from resources.QDropFrame import DropFrame
 from resources.QCustomButton import CustomButton
 from steganography.image.StegnoImg import imgSteg
 from steganography.Utilities import read_file_content
-import cv2, time, os, shutil
+import cv2, time, os, shutil, imageio
 
 class EncodePage(QFrame):
   def __init__(self, parent=None):
@@ -116,11 +116,9 @@ class EncodePage(QFrame):
 
 
   def downloadEncodedFile(self):
-    # Get the source_file_path 
-    source_file_path = f"output/{self.filename}"
 
     # Get the source file extension
-    source_extension = os.path.splitext(source_file_path)[1]
+    source_extension = os.path.splitext(self.source_file_path)[1]
 
     # Create the file type filter based on the source file extension
     file_type_filter = f"{source_extension.upper()} Files (*{source_extension})"
@@ -154,10 +152,15 @@ class EncodePage(QFrame):
       # For image type encoding
       imageSteganography = imgSteg()
       encoded_image = imageSteganography.encode(img=coverObjPath, message=read_file_content(payloadPath), bits=self.slider.value())
-      self.filename = f"img-{int(time.time())}{coverObjType}"
 
-      self.encodeFeedbackLabel.setText(f"Encoded Object: {self.filename}")
-      self.displayFeedbackImage(encoded_image, self.filename)
+      filename = f"img-{int(time.time())}{coverObjType}"
+      self.source_file_path = f"output/{filename}"
+
+      # save the output image (encoded image)
+      imageio.mimsave(self.source_file_path, encoded_image)
+
+      self.encodeFeedbackLabel.setText(f"Encoded Object: {filename}")
+      self.displayFeedbackImage()
 
       self.downloadEncodedButton.setVisible(True)
     elif coverObjType in [".txt", ".xls",".docx"]:
@@ -174,16 +177,14 @@ class EncodePage(QFrame):
       self.encodeFeedbackLabel.setText("Invalid input.")
     pass
 
-  def displayFeedbackImage(self, encoded_image, filename):
-    # Convert the BGR image to RGB (if necessary)
-    image_rgb = cv2.cvtColor(encoded_image, cv2.COLOR_BGR2RGB)
-    # Create a QImage from the RGB image data
-    height, width, channel = image_rgb.shape
-    qimage = QImage(image_rgb.data, width, height, width * channel, QImage.Format_RGB888)
+  def displayFeedbackImage(self):
+    # Load the encoded image using imageio
+    encoded_image = imageio.imread(self.source_file_path)
+    # Convert the numpy array to a QImage
+    height, width, channel = encoded_image.shape
+    bytes_per_line = 3 * width
+    qimage = QImage(encoded_image.data, width, height, bytes_per_line, QImage.Format_RGB888)
     pixmap = QPixmap.fromImage(qimage)
-  
-    # Save the QPixmap object as an image file
-    pixmap.save(f"output/{filename}")
 
     fixed_height = 100  # Specify the desired fixed height
 

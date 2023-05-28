@@ -1,6 +1,6 @@
 from StegnoImg import imgSteg
 import cv2 
-from Utilities import read_file_content
+from steganography.Utilities import read_file_content
 from tkinter import *
 from tkinter import ttk
 import imageio
