@@ -1,9 +1,8 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QFrame
-from QDropFrame import DropFrame
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QLabel
 from QEncodePage import EncodePage
 from QDecodePage import DecodePage
-import mimetypes
+# from StegnoImg import imgSteg
 
 app = QApplication(sys.argv)
 
@@ -26,15 +25,22 @@ class MainWindow(QMainWindow):
     main_widget = QWidget(self)
     self.setCentralWidget(main_widget)
     main_layout = QVBoxLayout(main_widget)
-    main_layout.setContentsMargins(0,0,0,0)
+    main_layout.setContentsMargins(0,10,0,0)
     
+    encodeTitle = QLabel("Encode", self, styleSheet="font-size:32px;font-weight:bold;font-family:Arial,sans-serif;color:white;")
+    encodeTitle.setFixedHeight(40)
+    encodeTitle.setContentsMargins(0,10,0,0)
     encodePage = EncodePage(self)
+
+    main_layout.addWidget(encodeTitle)
     main_layout.addWidget(encodePage)
 
-    # Add a gap between EncodePage and DecodePage
-    main_layout.addSpacing(8)
-
+    decodeTitle = QLabel("Decode", self, styleSheet="font-size:32px;font-weight:bold;font-family:Arial,sans-serif;color:white;")
+    decodeTitle.setFixedHeight(40)
+    decodeTitle.setContentsMargins(0,10,0,0)
     decodePage = DecodePage(self)
+
+    main_layout.addWidget(decodeTitle)
     main_layout.addWidget(decodePage)
 
     self.show()
