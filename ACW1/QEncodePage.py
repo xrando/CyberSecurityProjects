@@ -42,7 +42,7 @@ class EncodePage(QFrame):
     self.payloadDraggable = DropFrame(payloadFrame, 
       feedbackLabel = payloadFeedbackText, 
       displayFileIcon = payloadDisplayIcon,
-      allowedExtensions = [".txt", ".docx"]
+      allowedExtensions = [".txt"]
     )
     self.payloadDraggable.setFixedHeight(250)
 
@@ -64,7 +64,7 @@ class EncodePage(QFrame):
     self.coverObjDraggable = DropFrame(coverFrame, 
       feedbackLabel = coverObjFeedbackText, 
       displayFileIcon = coverObjDisplayIcon,
-      allowedExtensions = [".txt", ".csv", ".docx", ".jpg", ".png"]
+      allowedExtensions = [".txt", ".csv", ".docx", ".jpg", ".png", ".bmp", ".gif"]
     )
     self.coverObjDraggable.setFixedHeight(250)
 
@@ -150,7 +150,7 @@ class EncodePage(QFrame):
       self.encodeFeedbackLabel.setText("Invalid input.")
       return
     
-    if coverObjType in [".jpg", ".bmp", ".png"]:
+    if coverObjType in [".jpg", ".bmp", ".png", ".gif"]:
       # For image type encoding
       imageSteganography = imgSteg()
       encoded_image = imageSteganography.encode(img=coverObjPath, message=read_file_content(payloadPath), bits=self.slider.value())
@@ -165,7 +165,7 @@ class EncodePage(QFrame):
       self.encodeFeedbackLabel.setText(f"Encoded Object: doc-{int(time.time())}{coverObjType}")
       self.downloadEncodedButton.setVisible(True)
       pass
-    elif coverObjType in ["mp3", "mp4", "wav"]:
+    elif coverObjType in [".mp3", ".mp4", ".wav"]:
       # For audio type encoding
       self.encodeFeedbackLabel.setText(f"Encoded Object: aud-{int(time.time())}{coverObjType}")
       self.downloadEncodedButton.setVisible(True)
