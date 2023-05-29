@@ -19,7 +19,7 @@ class audioSteg:
     def convert_audio_to_wav(self, input_path, output_path):
         try:
             # Load audio file
-            audio = AudioSegment.from_file(input_path)
+            audio = AudioSegment.from_file(os.path.normpath(input_path))
             # Convert it to WAV format (loseless audio format)
             audio.export(output_path, format="wav")
             return output_path
@@ -185,20 +185,20 @@ class audioSteg:
             raise
 
 
-if __name__ == "__main__":
-    file_directory = "./files/"
+# if __name__ == "__main__":
+#     file_directory = "./files/"
 
-    input_audio_path = file_directory + "sample_3.wav"
-    output_audio_path = file_directory + "encode_stego.wav"
-    payload_path = file_directory + "payload_small.txt"
+#     input_audio_path = file_directory + "sample_3.wav"
+#     output_audio_path = file_directory + "encode_stego.wav"
+#     payload_path = file_directory + "payload_small.txt"
 
-    try:
-        num_lbs = 67
-        while num_lbs > 6:
-            num_lbs = int(input("Please enter the number of LBS to replace (1-6): "))
-            if num_lbs <= 6:
-                audioSteg = audioSteg()
-                audioSteg.encode(input_audio_path, output_audio_path, payload_path, num_lbs)
-                audioSteg.decode(output_audio_path, payload_path, num_lbs)
-    except Exception as e:
-        print("Error:", str(e))
+#     try:
+#         num_lbs = 6
+#         while num_lbs > 6:
+#             num_lbs = int(input("Please enter the number of LBS to replace (1-6): "))
+#             if num_lbs <= 6:
+#                 audioSteg = audioSteg()
+#                 audioSteg.encode(input_audio_path, output_audio_path, payload_path, num_lbs)
+#                 audioSteg.decode(output_audio_path, payload_path, num_lbs)
+#     except Exception as e:
+#         print("Error:", str(e))
