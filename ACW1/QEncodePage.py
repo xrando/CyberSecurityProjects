@@ -166,7 +166,7 @@ class EncodePage(QFrame):
         encoded_image = imgS.encode(img=coverObjPath, message=read_file_content(payloadPath), bits=self.slider.value())
 
         # Save the output image (encoded image)
-        imageio.mimsave(self.source_file_path, encoded_image)
+        imageio.mimsave(self.source_file_path, encoded_image,loop = 0)
 
         self.encodeFeedbackLabel.setText(f"Encoded Object: {filename}")
         self.displayFeedbackImage()

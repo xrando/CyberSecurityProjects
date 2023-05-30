@@ -17,7 +17,7 @@ if __name__ == "__main__":
 	# encode the data into the image
 	encoded_image = steg.encode(img=input_image, message=read_file_content(secret_data_file), bits = numOfBit)
 	# save the output image (encoded image)
-	imageio.mimsave(output_image, encoded_image)
+	imageio.mimsave(output_image, encoded_image,loop = 0)
 	# decode the secret data from the image
 	decoded_data = steg.decode(output_image, bits = numOfBit)
 	print("[+] Decoded data:", decoded_data)
