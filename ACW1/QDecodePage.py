@@ -1,4 +1,5 @@
 import sys
+from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QFrame, QSlider
 from PyQt5.QtCore import Qt
 from resources.QDropFrame import DropFrame
