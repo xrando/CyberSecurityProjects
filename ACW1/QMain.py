@@ -17,7 +17,7 @@ class MainWindow(QMainWindow):
   def __init__(self):
     super().__init__()
 
-    self.setWindowTitle("Steg Application")
+    self.setWindowTitle("Steganography Application")
     self.setGeometry(uiPositionX, uiPositionY, uiWidth, uiHeight)
     self.setFixedSize(uiWidth, uiHeight)
     self.setStyleSheet("background-color: #383838;");

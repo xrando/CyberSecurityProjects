@@ -30,20 +30,27 @@ class DecodePage(QFrame):
 
     # SideFrame layout
     sideFrameLayout = QVBoxLayout(sideFrame)
-    slider = QSlider(Qt.Horizontal)
-    slider.setRange(1, 6)  # Set the range from 0 to 5 (6 options)
-    slider.setTickInterval(1)  # Set the tick interval to 1
-    slider.setTickPosition(QSlider.TicksBelow)  # Show ticks below the slider
+    sideFrameLayout.setAlignment(Qt.AlignTop)
+    sideFrameLayout.setContentsMargins(30,10,30,10)
 
-    label = QLabel("1   ",styleSheet="font-size:28px;font-weight:bold;font-family:Arial,sans-serif;color:white;")
+    sliderLabel = QLabel("SELECT LSB", sideFrame, styleSheet="font-size:20px;font-weight:bold;font-family:Arial,sans-serif;")
 
-    slider.valueChanged.connect(lambda value: label.setText(f"{value}   "))
+    self.slider = QSlider(Qt.Horizontal)
+    self.slider.setRange(1, 6)  # Set the range from 0 to 5 (6 options)
+    self.slider.setTickInterval(1)  # Set the tick interval to 1
+    self.slider.setTickPosition(QSlider.TicksBelow)  # Show ticks below the slider
+
+    label = QLabel("1",styleSheet="font-size:28px;font-weight:bold;font-family:Arial,sans-serif;")
+
+    self.slider.valueChanged.connect(lambda value: label.setText(f"{value}   "))
 
     slider_layout = QHBoxLayout()
-    slider_layout.addWidget(slider)
+    slider_layout.addWidget(self.slider)
     slider_layout.addWidget(label)
 
+    sideFrameLayout.addWidget(sliderLabel)
     sideFrameLayout.addLayout(slider_layout)
+    sideFrameLayout.addSpacing(20)
     # SideFrame layout end
 
 

@@ -3,8 +3,10 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QImage
 from resources.QDropFrame import DropFrame
 from resources.QCustomButton import CustomButton
+from resources.QAudioPlayer import AudioPlayer
 from steganography.image.StegnoImg import imgSteg
 from steganography.Utilities import read_file_content
+from steganography.audio.StegnoAudio import audioSteg
 import cv2, time, os, shutil, imageio
 
 class EncodePage(QFrame):
@@ -64,7 +66,7 @@ class EncodePage(QFrame):
     self.coverObjDraggable = DropFrame(coverFrame, 
       feedbackLabel = coverObjFeedbackText, 
       displayFileIcon = coverObjDisplayIcon,
-      allowedExtensions = [".txt", ".csv", ".docx", ".jpg", ".png", ".bmp", ".gif"]
+      allowedExtensions = [".txt", ".csv", ".docx", ".jpg", ".png", ".bmp", ".gif", ".mp3", ".mp4", ".wav"]
     )
     self.coverObjDraggable.setFixedHeight(250)
 
@@ -103,6 +105,10 @@ class EncodePage(QFrame):
     self.downloadEncodedButton = CustomButton("DOWNLOAD", sideFrame, visible=False)
     self.downloadEncodedButton.clicked.connect(self.downloadEncodedFile)
 
+    self.mediaPlayerFeedback = AudioPlayer(sideFrame)
+    # Show the main window
+    self.mediaPlayerFeedback.hide()
+
     sideFrameLayout.addWidget(sliderLabel)
     sideFrameLayout.addLayout(slider_layout)
     sideFrameLayout.addSpacing(20)
@@ -110,6 +116,7 @@ class EncodePage(QFrame):
     sideFrameLayout.addSpacing(20)
     sideFrameLayout.addWidget(self.encodeFeedbackLabel)
     sideFrameLayout.addWidget(self.encodeFeedbackImage)
+    sideFrameLayout.addWidget(self.mediaPlayerFeedback)
     sideFrameLayout.addSpacing(20)
     sideFrameLayout.addWidget(self.downloadEncodedButton)
     # SideFrame layout end
@@ -135,47 +142,62 @@ class EncodePage(QFrame):
       destination_file_path = os.path.join(destination_folder, filename)
 
       # Copy the source file to the destination file path
-      shutil.copy(source_file_path, destination_file_path)
+      shutil.copy(self.source_file_path, destination_file_path)
 
   def encodeFile(self):
-    self.resetFeedback()
-    payloadPath, payloadType = self.payloadDraggable.value
-    coverObjPath, coverObjType = self.coverObjDraggable.value
-    print(payloadPath, payloadType, coverObjPath, coverObjType)
-    print(self.slider.value())
+    try:
+      self.resetFeedback()
+      payloadPath, payloadType = self.payloadDraggable.value
+      coverObjPath, coverObjType = self.coverObjDraggable.value
 
-    if payloadPath is None or payloadType is None:
-      self.encodeFeedbackLabel.setText("Invalid input.")
-      return
-    
-    if coverObjType in [".jpg", ".bmp", ".png", ".gif"]:
-      # For image type encoding
-      imageSteganography = imgSteg()
-      encoded_image = imageSteganography.encode(img=coverObjPath, message=read_file_content(payloadPath), bits=self.slider.value())
+      if payloadPath is None or payloadType is None:
+        self.encodeFeedbackLabel.setText("Invalid input.")
+        return
+      
+      if coverObjType in [".jpg", ".bmp", ".png", ".gif"]:
+        # For image type encoding
+        filename = f"img-{int(time.time())}{coverObjType}"
+        self.source_file_path = f"output/{filename}"
 
-      filename = f"img-{int(time.time())}{coverObjType}"
-      self.source_file_path = f"output/{filename}"
+        # Initialize the image steganography object
+        imgS = imgSteg()
 
-      # save the output image (encoded image)
-      imageio.mimsave(self.source_file_path, encoded_image)
+        # Begin encoding the payload with cover object
+        encoded_image = imgS.encode(img=coverObjPath, message=read_file_content(payloadPath), bits=self.slider.value())
 
-      self.encodeFeedbackLabel.setText(f"Encoded Object: {filename}")
-      self.displayFeedbackImage()
+        # Save the output image (encoded image)
+        imageio.mimsave(self.source_file_path, encoded_image)
 
-      self.downloadEncodedButton.setVisible(True)
-    elif coverObjType in [".txt", ".xls",".docx"]:
-      # For document type encoding
-      self.encodeFeedbackLabel.setText(f"Encoded Object: doc-{int(time.time())}{coverObjType}")
-      self.downloadEncodedButton.setVisible(True)
-      pass
-    elif coverObjType in [".mp3", ".mp4", ".wav"]:
-      # For audio type encoding
-      self.encodeFeedbackLabel.setText(f"Encoded Object: aud-{int(time.time())}{coverObjType}")
-      self.downloadEncodedButton.setVisible(True)
-      pass
-    else:
-      self.encodeFeedbackLabel.setText("Invalid input.")
-    pass
+        self.encodeFeedbackLabel.setText(f"Encoded Object: {filename}")
+        self.displayFeedbackImage()
+
+        self.downloadEncodedButton.setVisible(True)
+
+      elif coverObjType in [".txt", ".xls",".docx"]:
+
+        # For document type encoding
+        self.encodeFeedbackLabel.setText(f"Encoded Object: doc-{int(time.time())}{coverObjType}")
+        self.downloadEncodedButton.setVisible(True)
+        pass
+
+
+      elif coverObjType in [".mp3", ".mp4", ".wav"]:
+        # For audio type encoding
+        filename = f"audio-{int(time.time())}{coverObjType}"
+        self.source_file_path = f"output/{filename}"
+        audioS = audioSteg()
+        audioS.encode(audio_path=coverObjPath,output_path = self.source_file_path, payload_path=payloadPath, num_lsb = self.slider.value())
+        self.mediaPlayerFeedback.setAudioPath(self.source_file_path)
+        self.mediaPlayerFeedback.show()
+
+        self.encodeFeedbackLabel.setText(f"Encoded Object: {filename}")
+        self.downloadEncodedButton.setVisible(True)
+        pass
+      else:
+        self.encodeFeedbackLabel.setText("Invalid input.")
+
+    except Exception as e:
+      self.encodeFeedbackLabel.setText(str(e))
 
   def displayFeedbackImage(self):
     # Load the encoded image using imageio

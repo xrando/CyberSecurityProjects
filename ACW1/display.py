@@ -13,7 +13,7 @@ if __name__ == "__main__":
 	output_image = "encoded_image.gif"
 	#secret_data = "test message"
 	secret_data_file = "t.docx"
-	numOfBit = 5
+	numOfBit = 6
 	# encode the data into the image
 	encoded_image = steg.encode(img=input_image, message=read_file_content(secret_data_file), bits = numOfBit)
 	# save the output image (encoded image)
