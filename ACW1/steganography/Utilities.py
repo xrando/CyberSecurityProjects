@@ -24,4 +24,3 @@ def read_file_content(file_path):
     else:
         return None
 
-print(read_file_content("t.docx"))
