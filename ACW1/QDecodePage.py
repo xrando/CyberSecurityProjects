@@ -60,9 +60,6 @@ class DecodePage(QFrame):
     coverFrameLayout = QVBoxLayout(coverFrame)
     coverFrameLayout.setAlignment(Qt.AlignTop)
 
-    coverObjDndLabel = QLabel("ENCODED COVER OBJECT INPUT", payloadFrame, styleSheet="font-size:20px;font-weight:bold;font-family:Arial,sans-serif;")
-    coverFrameLayout.addWidget(coverObjDndLabel, alignment=Qt.AlignTop)
-
     coverObjFeedbackText = QLabel("", coverFrame)
     coverObjDisplayIcon = QLabel("", coverFrame)
 
