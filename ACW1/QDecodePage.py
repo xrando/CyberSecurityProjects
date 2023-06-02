@@ -22,9 +22,9 @@ class DecodePage(QFrame):
     col_layout = QHBoxLayout(self)
     col_layout.setContentsMargins(0, 0, 0, 0)  # Set margins to 0
 
-    payloadFrame = QFrame(self, styleSheet="")
-    payloadFrame.setFrameShape(QFrame.StyledPanel)
-    col_layout.addWidget(payloadFrame)
+    # payloadFrame = QFrame(self, styleSheet="")
+    # payloadFrame.setFrameShape(QFrame.StyledPanel)
+    # col_layout.addWidget(payloadFrame)
 
     coverFrame = QFrame(self)
     coverFrame.setFrameShape(QFrame.StyledPanel)
@@ -36,29 +36,32 @@ class DecodePage(QFrame):
     col_layout.addWidget(sideFrame)
 
     # payloadColFrame layout
-    payloadFrameLayout = QVBoxLayout(payloadFrame)
-    payloadFrameLayout.setAlignment(Qt.AlignTop)
-    payloadDndLabel = QLabel("ENCODED TEXT DOCUMENT INPUT", payloadFrame, styleSheet="font-size:20px;font-weight:bold;font-family:Arial,sans-serif;")
-    payloadFrameLayout.addWidget(payloadDndLabel, alignment=Qt.AlignTop)
+    # payloadFrameLayout = QVBoxLayout(payloadFrame)
+    # payloadFrameLayout.setAlignment(Qt.AlignTop)
+    # payloadDndLabel = QLabel("ENCODED TEXT DOCUMENT INPUT", payloadFrame, styleSheet="font-size:20px;font-weight:bold;font-family:Arial,sans-serif;")
+    # payloadFrameLayout.addWidget(payloadDndLabel, alignment=Qt.AlignTop)
 
-    payloadFeedbackText = QLabel("", coverFrame)
-    payloadDisplayIcon = QLabel("", coverFrame)
+    # payloadFeedbackText = QLabel("", coverFrame)
+    # payloadDisplayIcon = QLabel("", coverFrame)
 
-    self.payloadDraggable = DropFrame(payloadFrame, 
-      feedbackLabel = payloadFeedbackText, 
-      displayFileIcon = payloadDisplayIcon,
-      allowedExtensions = [".txt"]
-    )
-    self.payloadDraggable.setFixedHeight(250)
+    # self.payloadDraggable = DropFrame(payloadFrame, 
+    #   feedbackLabel = payloadFeedbackText, 
+    #   displayFileIcon = payloadDisplayIcon,
+    #   allowedExtensions = [".txt"]
+    # )
+    # self.payloadDraggable.setFixedHeight(250)
 
-    payloadFrameLayout.addWidget(self.payloadDraggable)
-    payloadFrameLayout.addWidget(payloadFeedbackText)
-    payloadFrameLayout.addWidget(payloadDisplayIcon)
+    # payloadFrameLayout.addWidget(self.payloadDraggable)
+    # payloadFrameLayout.addWidget(payloadFeedbackText)
+    # payloadFrameLayout.addWidget(payloadDisplayIcon)
     # payloadColFrame layout end
 
     # ContentFrame layout
     coverFrameLayout = QVBoxLayout(coverFrame)
     coverFrameLayout.setAlignment(Qt.AlignTop)
+
+    # coverObjDndLabel = QLabel("COVER OBJECT INPUT", payloadFrame, styleSheet="font-size:20px;font-weight:bold;font-family:Arial,sans-serif;")
+    # coverFrameLayout.addWidget(coverObjDndLabel, alignment=Qt.AlignTop)
 
     coverObjFeedbackText = QLabel("", coverFrame)
     coverObjDisplayIcon = QLabel("", coverFrame)
@@ -73,7 +76,6 @@ class DecodePage(QFrame):
     coverFrameLayout.addWidget(self.coverObjDraggable)
     coverFrameLayout.addWidget(coverObjFeedbackText)
     coverFrameLayout.addWidget(coverObjDisplayIcon)
-    
     # ContentFrame layout end
 
     # SideFrame layout
@@ -104,12 +106,11 @@ class DecodePage(QFrame):
     # self.encodeFeedbackAudio 
 
     self.downloadDecodedButton = CustomButton("DOWNLOAD", sideFrame, visible=False)
-    #self.downloadDecodedButton.clicked.connect(self.downloadDecodedFile)
+    self.downloadDecodedButton.clicked.connect(self.downloadDecodedFile)
 
     self.mediaPlayerFeedback = AudioPlayer(sideFrame)
     # Show the main window
     self.mediaPlayerFeedback.hide()
-
 
     sideFrameLayout.addWidget(sliderLabel)
     sideFrameLayout.addLayout(slider_layout)
@@ -123,44 +124,99 @@ class DecodePage(QFrame):
     sideFrameLayout.addWidget(self.downloadDecodedButton)
     # SideFrame layout end
 
+  def downloadDecodedFile(self):
+
+    # Get the source file extension
+    source_extension = os.path.splitext(self.source_file_path)[1]
+
+    # Create the file type filter based on the source file extension
+    file_type_filter = f"{source_extension.upper()} Files (*{source_extension})"
+
+    # Open the file dialog to let the user choose the save location
+    save_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", file_type_filter)
+
+    if save_path:
+      # Get the destination folder and filename from the save_path
+      destination_folder = os.path.dirname(save_path)
+      filename = os.path.basename(save_path)
+
+      # Create the destination file path
+      destination_file_path = os.path.join(destination_folder, filename)
+
+      # Copy the source file to the destination file path
+      shutil.copy(self.source_file_path, destination_file_path)
+
+
 
   def decodeFile(self):
       try:
           self.resetFeedback()
-          sourceObjPath, sourceObjType = self.sourceObjDraggable.value
+          #payloadPath, payloadType = self.payloadDraggable.value
+          coverObjPath, coverObjType = self.coverObjDraggable.value
 
-          if sourceObjPath is None or sourceObjType is None:
-              self.decodeFeedbackLabel.setText("Invalid input.")
-              return
+          # if payloadPath is None or payloadType is None:
+          #     self.decodeFeedbackLabel.setText("Invalid input.")
+          #     return
 
-          if sourceObjType in [".jpg", ".bmp", ".png", ".gif"]:
-              # For image type decoding
-              imgS = imgSteg()
-              decoded_message = imgS.decode(img=sourceObjPath)
+          if coverObjType in [".jpg", ".bmp", ".png", ".gif"]:
+          # For image type encoding
+            filename = f"img-{int(time.time())}{coverObjType}"
+            self.source_file_path = f"output/{filename}"
 
-              if decoded_message is not None:
-                  self.decodeFeedbackLabel.setText("Decoded Message:")
-                  self.displayDecodedText(decoded_message)
-              else:
-                  self.decodeFeedbackLabel.setText("No hidden message found.")
+            # Initialize the image steganography object
+            imgS = imgSteg()
 
-          elif sourceObjType in [".txt", ".xls", ".docx"]:
+            # Begin encoding the payload with cover object
+            # decoded_image = imgS.encode(img=coverObjPath, message=read_file_content(payloadPath), bits=self.slider.value())
+
+          # Save the output image (encoded image)
+          # imageio.mimsave(self.source_file_path, decoded_image,loop = 0)
+
+            self.decodeFeedbackLabel.setText(f"Encoded Object: {filename}")
+            self.displayFeedbackImage()
+
+            self.downloadEncodedButton.setVisible(True)
+
+          # if decoded_message is not None:
+          #     self.decodeFeedbackLabel.setText("Decoded Message:")
+          #     self.displayDecodedText(decoded_message)
+          # else:
+          #     self.decodeFeedbackLabel.setText("No hidden message found.")
+
+          elif coverObjType in [".txt", ".xls", ".docx"]:
+              
               # For document type decoding
-              self.decodeFeedbackLabel.setText("Decoding document type is not supported.")
-
-          elif sourceObjType in [".mp3", ".mp4", ".wav"]:
+              self.encodeFeedbackLabel.setText(f"Encoded Object: doc-{int(time.time())}{coverObjType}")
+              # self.decodeFeedbackLabel.setText("Decoding document type is not supported.")
+              self.downloadDecodedButton.setVisible(True)
+              pass
+                     
+          elif coverObjType in [".mp3", ".mp4", ".wav"]:
               # For audio type decoding
+              filename = f"audio-{int(time.time())}{coverObjType}"
+              self.source_file_path = f"output/{filename}"
               audioS = audioSteg()
-              decoded_message = audioS.decode(audio_path=sourceObjPath)
+              # audioS.encode(audio_path=coverObjPath,output_path = self.source_file_path, payload_path=payloadPath, num_lsb = self.slider.value())
+              self.mediaPlayerFeedback.setAudioPath(self.source_file_path)
+              self.mediaPlayerFeedback.show()
 
-              if decoded_message is not None:
-                  self.decodeFeedbackLabel.setText("Decoded Message:")
-                  self.displayDecodedText(decoded_message)
-              else:
-                  self.decodeFeedbackLabel.setText("No hidden message found.")
-
+              self.encodeFeedbackLabel.setText(f"Encoded Object: {filename}")
+              self.downloadEncodedButton.setVisible(True)
+              pass
           else:
-              self.decodeFeedbackLabel.setText("Invalid input.")
+            self.encodeFeedbackLabel.setText("Invalid input.")
+
+          #     audioS = audioSteg()
+          #     decoded_message = audioS.decode(audio_path=sourceObjPath)
+
+          #     if decoded_message is not None:
+          #         self.decodeFeedbackLabel.setText("Decoded Message:")
+          #         self.displayDecodedText(decoded_message)
+          #     else:
+          #         self.decodeFeedbackLabel.setText("No hidden message found.")
+
+          # else:
+          #     self.decodeFeedbackLabel.setText("Invalid input.")
 
       except Exception as e:
           self.decodeFeedbackLabel.setText(str(e))
@@ -189,5 +245,3 @@ class DecodePage(QFrame):
     self.decodeFeedbackImage.clear()
     self.decodeFeedbackImage.setVisible(False)
     self.downloadDecodedButton.setVisible(False)
-
-
