@@ -1,6 +1,6 @@
 import sys
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QFrame, QSlider, QFileDialog
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QFrame, QSlider, QFileDialog, QFileIconProvider
+from PyQt5.QtCore import Qt, QFileInfo
 from PyQt5.QtGui import QPixmap, QImage
 from resources.QDropFrame import DropFrame
 from resources.QCustomButton import CustomButton
@@ -151,19 +151,24 @@ class DecodePage(QFrame):
       try:
           self.resetFeedback()
           #payloadPath, payloadType = self.payloadDraggable.value
-          coverObjPath, coverObjType = self.coverObjDraggable.value
+          encodedObjPath, encodedObjType = self.coverObjDraggable.value
 
-          # if payloadPath is None or payloadType is None:
-          #     self.decodeFeedbackLabel.setText("Invalid input.")
-          #     return
+          if encodedObjPath is None or encodedObjType is None:
+              self.decodeFeedbackLabel.setText("Invalid input.")
+              return
 
-          if coverObjType in [".jpg", ".bmp", ".png", ".gif"]:
-          # For image type encoding
-            filename = f"img-{int(time.time())}{coverObjType}"
-            self.source_file_path = f"output/{filename}"
+          filename = f"decodedmsg-{int(time.time())}.txt"
+          self.source_file_path = f"output/decoded/{filename}"
 
+          if encodedObjType in [".jpg", ".bmp", ".png", ".gif"]:
             # Initialize the image steganography object
             imgS = imgSteg()
+
+            # Begin decoding the object
+            print(encodedObjPath)
+            decoded_data = imgS.decode(img=encodedObjPath, bits=self.slider.value())
+            with open(self.source_file_path, 'w') as file:
+              file.write(decoded_data)
 
             # Begin encoding the payload with cover object
             # decoded_image = imgS.encode(img=coverObjPath, message=read_file_content(payloadPath), bits=self.slider.value())
@@ -172,7 +177,7 @@ class DecodePage(QFrame):
           # imageio.mimsave(self.source_file_path, decoded_image,loop = 0)
 
             self.decodeFeedbackLabel.setText(f"Decoded Object: {filename}")
-            self.displayFeedbackImage()
+            self.displayDocFileIcon()
 
             self.downloadDecodedButton.setVisible(True)
 
@@ -182,28 +187,25 @@ class DecodePage(QFrame):
           # else:
           #     self.decodeFeedbackLabel.setText("No hidden message found.")
 
-          elif coverObjType in [".txt", ".xls", ".docx"]:
+          elif encodedObjType in [".txt", ".xls", ".docx"]:
               
               # For document type decoding
-              self.decodeFeedbackLabel.setText(f"Decoded Object: doc-{int(time.time())}{coverObjType}")
+              self.decodeFeedbackLabel.setText(f"Decoded Object: {filename}")
               # self.decodeFeedbackLabel.setText("Decoding document type is not supported.")
               self.downloadDecodedButton.setVisible(True)
               pass
                      
-          elif coverObjType in [".mp3", ".mp4", ".wav"]:
-              # For audio type decoding
-              filename = f"audio-{int(time.time())}{coverObjType}"
-              self.source_file_path = f"output/{filename}"
+          elif encodedObjType in [".mp3", ".mp4", ".wav"]:
               audioS = audioSteg()
               # audioS.encode(audio_path=coverObjPath,output_path = self.source_file_path, payload_path=payloadPath, num_lsb = self.slider.value())
-              self.mediaPlayerFeedback.setAudioPath(self.source_file_path)
-              self.mediaPlayerFeedback.show()
+              audioS.decode(audio_path=encodedObjPath, output_path=self.source_file_path, num_lsb=self.slider.value())
 
               self.decodeFeedbackLabel.setText(f"Decoded Object: {filename}")
+              self.displayDocFileIcon()
               self.downloadDecodedButton.setVisible(True)
               pass
           else:
-            self.DecodeFeedbackLabel.setText("Invalid input.")
+            self.decodeFeedbackLabel.setText("Invalid input.")
 
           #     audioS = audioSteg()
           #     decoded_message = audioS.decode(audio_path=sourceObjPath)
@@ -236,6 +238,16 @@ class DecodePage(QFrame):
     fixed_width = int(fixed_height * aspect_ratio)
 
     pixmap = pixmap.scaled(fixed_width, fixed_height, Qt.AspectRatioMode.KeepAspectRatio)
+    self.decodeFeedbackImage.setPixmap(pixmap)
+    self.decodeFeedbackImage.setVisible(True)
+
+  def displayDocFileIcon(self):
+    # Use the MIME type to retrieve the appropriate icon
+    file_icon_provider = QFileIconProvider()
+    icon = file_icon_provider.icon(QFileInfo(self.source_file_path))
+
+    pixmap = icon.pixmap(64, 64)
+    pixmap = pixmap.scaled(64, 64, Qt.AspectRatioMode.KeepAspectRatio)
     self.decodeFeedbackImage.setPixmap(pixmap)
     self.decodeFeedbackImage.setVisible(True)
 

@@ -158,7 +158,7 @@ class EncodePage(QFrame):
       if coverObjType in [".jpg", ".bmp", ".png", ".gif"]:
         # For image type encoding
         filename = f"img-{int(time.time())}{coverObjType}"
-        self.source_file_path = f"output/{filename}"
+        self.source_file_path = f"output/encoded/{filename}"
 
         # Initialize the image steganography object
         imgS = imgSteg()
@@ -184,7 +184,7 @@ class EncodePage(QFrame):
         # For document type encoding
         filename = f"doc-{int(time.time())}{coverObjType}"
         self.encodeFeedbackLabel.setText(f"Encoded Object: {filename}")
-        self.source_file_path = f"output/{filename}"
+        self.source_file_path = f"output/encoded/{filename}"
 
         # Initialize the image steganography object
         wordDocS = fontcolourSteganography()
@@ -199,7 +199,7 @@ class EncodePage(QFrame):
       elif coverObjType in [".mp3", ".mp4", ".wav"]:
         # For audio type encoding
         filename = f"audio-{int(time.time())}{coverObjType}"
-        self.source_file_path = f"output/{filename}"
+        self.source_file_path = f"output/encoded/{filename}"
         audioS = audioSteg()
         audioS.encode(audio_path=coverObjPath,output_path = self.source_file_path, payload_path=payloadPath, num_lsb = self.slider.value())
         self.mediaPlayerFeedback.setAudioPath(self.source_file_path)
