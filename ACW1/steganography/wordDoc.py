@@ -91,7 +91,7 @@ class fontcolourSteganography:
                     # if the length reaches 8 or more, converts the first 8 bits to a char and append to payload
                     if len(binaryMessage) >= 8:
                         payload += chr(int(binaryMessage[:8], 2))
-                        # if payload ends with "======", breaks the loop as it is the end of the message
+                        # if payload ends with "#####", breaks the loop as it is the end of the message
                         if payload.endswith("#####"):
                             break
                         # updates the binary message by removing first 8 bits
@@ -101,7 +101,7 @@ class fontcolourSteganography:
         with open(outputFilePath, 'w', encoding='utf-8') as file:
             file.write(payload[:-5])
 
-        # returns payload (which will exclude the marker "=====" which signifies the end of the message)
+        # returns payload (which will exclude the marker "#####" which signifies the end of the message)
         return payload[:-5]
 
 if __name__ == "__main__":
