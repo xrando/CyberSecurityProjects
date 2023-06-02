@@ -60,8 +60,8 @@ class DecodePage(QFrame):
     coverFrameLayout = QVBoxLayout(coverFrame)
     coverFrameLayout.setAlignment(Qt.AlignTop)
 
-    # coverObjDndLabel = QLabel("COVER OBJECT INPUT", payloadFrame, styleSheet="font-size:20px;font-weight:bold;font-family:Arial,sans-serif;")
-    # coverFrameLayout.addWidget(coverObjDndLabel, alignment=Qt.AlignTop)
+    coverObjDndLabel = QLabel("COVER OBJECT INPUT", coverFrame, styleSheet="font-size:20px;font-weight:bold;font-family:Arial,sans-serif;")
+    coverFrameLayout.addWidget(coverObjDndLabel, alignment=Qt.AlignTop)
 
     coverObjFeedbackText = QLabel("", coverFrame)
     coverObjDisplayIcon = QLabel("", coverFrame)
@@ -103,7 +103,7 @@ class DecodePage(QFrame):
 
     self.decodeFeedbackLabel = QLabel("", sideFrame)
     self.decodeFeedbackImage = QLabel("", sideFrame, visible=False)
-    # self.encodeFeedbackAudio 
+    # self.DecodeFeedbackAudio 
 
     self.downloadDecodedButton = CustomButton("DOWNLOAD", sideFrame, visible=False)
     self.downloadDecodedButton.clicked.connect(self.downloadDecodedFile)
@@ -175,7 +175,7 @@ class DecodePage(QFrame):
             self.decodeFeedbackLabel.setText(f"Encoded Object: {filename}")
             self.displayFeedbackImage()
 
-            self.downloadEncodedButton.setVisible(True)
+            self.downloadDecodedButton.setVisible(True)
 
           # if decoded_message is not None:
           #     self.decodeFeedbackLabel.setText("Decoded Message:")
@@ -186,7 +186,7 @@ class DecodePage(QFrame):
           elif coverObjType in [".txt", ".xls", ".docx"]:
               
               # For document type decoding
-              self.encodeFeedbackLabel.setText(f"Encoded Object: doc-{int(time.time())}{coverObjType}")
+              self.decodeFeedbackLabel.setText(f"Decoded Object: doc-{int(time.time())}{coverObjType}")
               # self.decodeFeedbackLabel.setText("Decoding document type is not supported.")
               self.downloadDecodedButton.setVisible(True)
               pass
@@ -200,11 +200,11 @@ class DecodePage(QFrame):
               self.mediaPlayerFeedback.setAudioPath(self.source_file_path)
               self.mediaPlayerFeedback.show()
 
-              self.encodeFeedbackLabel.setText(f"Encoded Object: {filename}")
-              self.downloadEncodedButton.setVisible(True)
+              self.decodeFeedbackLabel.setText(f"Decoded Object: {filename}")
+              self.downloadDecodedButton.setVisible(True)
               pass
           else:
-            self.encodeFeedbackLabel.setText("Invalid input.")
+            self.DecodeFeedbackLabel.setText("Invalid input.")
 
           #     audioS = audioSteg()
           #     decoded_message = audioS.decode(audio_path=sourceObjPath)
