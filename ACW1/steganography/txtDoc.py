@@ -61,9 +61,9 @@ class WhitespaceSteganography:
 obj = WhitespaceSteganography()
 
 # To encode
-obj.hide_text_payload("cover.txt", "payload.txt", "encoded.txt")
+obj.hide_text_payload("files/cover.txt", "files/payload.txt", "files/encoded.txt")
 print("Text payload successfully hidden.")
 
 # To decode
-payload = obj.extract_hidden_payload("encoded.txt")
+payload = obj.extract_hidden_payload("files/encoded.txt")
 print("Text payload successfully extracted:", payload)
