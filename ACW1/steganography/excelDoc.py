@@ -140,13 +140,13 @@ class ExcelSteganography:
         self.workbook.save(save_file_path)
 
 # initialize obj with the cover excel file
-obj = ExcelSteganography('cover.xlsx')
+obj = ExcelSteganography('files/cover.xlsx')
 
 # encode with the payload
-encoded_workbook = obj.encode_with_payload('payload.txt', 3)
+encoded_workbook = obj.encode_with_payload('files/payload.txt', 3)
 
 # save the encoded file
-obj.save('encoded.xlsx')
+obj.save('files/encoded.xlsx')
 
 # decode the encoded file
 decoded_msg = obj.decode(3)
