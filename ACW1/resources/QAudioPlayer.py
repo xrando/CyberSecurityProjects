@@ -13,10 +13,10 @@ class AudioPlayer(QWidget):
 
     # Create a layout for the player
     layout = QHBoxLayout(self)
-    layout.setContentsMargins(0,0,0,0)
+    layout.setContentsMargins(0, 0, 0, 0)
 
     # Create a QMediaPlayer object
-    self.mediaPlayer = QMediaPlayer(None, QMediaPlayer.VideoSurface)
+    self.mediaPlayer = QMediaPlayer(None)
 
     # Create a QVideoWidget object to display the audio file
     self.videoWidget = QVideoWidget(self)
@@ -31,23 +31,29 @@ class AudioPlayer(QWidget):
     self.playButton = CustomButton("Play", self)
     self.playButton.clicked.connect(self.play_audio)
 
-    # Add the video widget, audio icon label, and play button to the layout
+    # Create a QPushButton for the stop button
+    self.stopButton = CustomButton("Stop", self)
+    self.stopButton.clicked.connect(self.stop_audio)
+
+    # Add the video widget, audio icon label, play button, and stop button to the layout
     layout.addWidget(self.audioIconLabel)
     layout.addWidget(self.videoWidget)
     layout.addWidget(self.playButton)
+    layout.addWidget(self.stopButton)
 
   def play_audio(self):
-    # Specify the audio file path
-    # audio_file = '/path/to/your/audio/file.mp3'
-
     # Load the audio file into the QMediaPlayer
     if hasattr(self, "audioPath") and self.audioPath is not None:
-      audio_path = QUrl.fromLocalFile(self.audioPath)
-      self.mediaPlayer.setMedia(QMediaContent(audio_path))
+        audio_path = QUrl.fromLocalFile(self.audioPath)
+        self.mediaPlayer.setMedia(QMediaContent(audio_path))
 
     # Play the audio
     self.mediaPlayer.play()
-  
+
+  def stop_audio(self):
+    # Stop the audio playback
+    self.mediaPlayer.stop()
+
   def setAudioPath(self, audioPath):
     self.audioPath = audioPath
 

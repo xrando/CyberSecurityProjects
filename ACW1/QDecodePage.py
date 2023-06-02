@@ -1,14 +1,13 @@
 import sys
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QFrame, QSlider, QFileDialog
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QFrame, QSlider, QFileDialog
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QImage
 from resources.QDropFrame import DropFrame
 from resources.QCustomButton import CustomButton
 from resources.QAudioPlayer import AudioPlayer
-from steganography.image.StegnoImg import imgSteg
+from steganography.Image import imgSteg
 from steganography.Utilities import read_file_content
-from steganography.audio.StegnoAudio import audioSteg
+from steganography.Audio import audioSteg
 import cv2, time, os, shutil, imageio
 
 
@@ -92,7 +91,7 @@ class DecodePage(QFrame):
 
     label = QLabel("1",styleSheet="font-size:28px;font-weight:bold;font-family:Arial,sans-serif;")
 
-    self.slider.valueChanged.connect(lambda value: label.setText(f"{value}   "))
+    self.slider.valueChanged.connect(lambda value: label.setText(f"{value}"))
 
     slider_layout = QHBoxLayout()
     slider_layout.addWidget(self.slider)
@@ -172,7 +171,7 @@ class DecodePage(QFrame):
           # Save the output image (encoded image)
           # imageio.mimsave(self.source_file_path, decoded_image,loop = 0)
 
-            self.decodeFeedbackLabel.setText(f"Encoded Object: {filename}")
+            self.decodeFeedbackLabel.setText(f"Decoded Object: {filename}")
             self.displayFeedbackImage()
 
             self.downloadDecodedButton.setVisible(True)

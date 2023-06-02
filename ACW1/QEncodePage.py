@@ -1,12 +1,13 @@
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QFrame, QSlider, QFileDialog
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QFrame, QSlider, QFileDialog, QFileIconProvider
+from PyQt5.QtCore import Qt, QFileInfo
 from PyQt5.QtGui import QPixmap, QImage
 from resources.QDropFrame import DropFrame
 from resources.QCustomButton import CustomButton
 from resources.QAudioPlayer import AudioPlayer
-from steganography.image.StegnoImg import imgSteg
+from steganography.Image import imgSteg
 from steganography.Utilities import read_file_content
-from steganography.audio.StegnoAudio import audioSteg
+from steganography.Audio import audioSteg
+from steganography.wordDoc import fontcolourSteganography
 import cv2, time, os, shutil, imageio
 
 class EncodePage(QFrame):
@@ -44,7 +45,7 @@ class EncodePage(QFrame):
     self.payloadDraggable = DropFrame(payloadFrame, 
       feedbackLabel = payloadFeedbackText, 
       displayFileIcon = payloadDisplayIcon,
-      allowedExtensions = [".txt"]
+      allowedExtensions = [".txt", ".xlsx"]
     )
     self.payloadDraggable.setFixedHeight(250)
 
@@ -57,7 +58,7 @@ class EncodePage(QFrame):
     coverFrameLayout = QVBoxLayout(coverFrame)
     coverFrameLayout.setAlignment(Qt.AlignTop)
 
-    coverObjDndLabel = QLabel("COVER OBJECT INPUT", payloadFrame, styleSheet="font-size:20px;font-weight:bold;font-family:Arial,sans-serif;")
+    coverObjDndLabel = QLabel("COVER OBJECT INPUT", coverFrame, styleSheet="font-size:20px;font-weight:bold;font-family:Arial,sans-serif;")
     coverFrameLayout.addWidget(coverObjDndLabel, alignment=Qt.AlignTop)
 
     coverObjFeedbackText = QLabel("", coverFrame)
@@ -173,12 +174,26 @@ class EncodePage(QFrame):
 
         self.downloadEncodedButton.setVisible(True)
 
-      elif coverObjType in [".txt", ".xls",".docx"]:
+      elif coverObjType in [".txt"]:
 
         # For document type encoding
         self.encodeFeedbackLabel.setText(f"Encoded Object: doc-{int(time.time())}{coverObjType}")
         self.downloadEncodedButton.setVisible(True)
         pass
+      elif coverObjType in [".docx"]:
+        # For document type encoding
+        filename = f"doc-{int(time.time())}{coverObjType}"
+        self.encodeFeedbackLabel.setText(f"Encoded Object: {filename}")
+        self.source_file_path = f"output/{filename}"
+
+        # Initialize the image steganography object
+        wordDocS = fontcolourSteganography()
+
+        # Begin encoding the payload with cover object
+        encodedDocx = wordDocS.encode(filePath=coverObjPath, payload_file=payloadPath, bit=self.slider.value())
+        encodedDocx.save(self.source_file_path)
+        self.displayDocFileIcon()
+        self.downloadEncodedButton.setVisible(True)
 
 
       elif coverObjType in [".mp3", ".mp4", ".wav"]:
@@ -202,6 +217,8 @@ class EncodePage(QFrame):
   def displayFeedbackImage(self):
     # Load the encoded image using imageio
     encoded_image = imageio.imread(self.source_file_path)
+    image_type = self.source_file_path.split(".")[1]
+
     # Convert the numpy array to a QImage
     height, width, channel = encoded_image.shape
     bytes_per_line = 3 * width
@@ -218,9 +235,22 @@ class EncodePage(QFrame):
     self.encodeFeedbackImage.setPixmap(pixmap)
     self.encodeFeedbackImage.setVisible(True)
   
+  def displayDocFileIcon(self):
+    # Use the MIME type to retrieve the appropriate icon
+    file_icon_provider = QFileIconProvider()
+    icon = file_icon_provider.icon(QFileInfo(self.source_file_path))
+
+    pixmap = icon.pixmap(64, 64)
+    pixmap = pixmap.scaled(64, 64, Qt.AspectRatioMode.KeepAspectRatio)
+    self.encodeFeedbackImage.setPixmap(pixmap)
+    self.encodeFeedbackImage.setVisible(True)
+  
   def resetFeedback(self):    
     self.encodeFeedbackLabel.setText("")
     self.encodeFeedbackImage.clear()
     self.encodeFeedbackImage.setVisible(False)
     self.downloadEncodedButton.setVisible(False)
+    self.mediaPlayerFeedback.stop_audio()
+    self.mediaPlayerFeedback.hide()
+
 
