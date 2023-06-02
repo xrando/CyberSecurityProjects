@@ -26,18 +26,18 @@ class fontcolourSteganography:
         with open(payload_file, 'r', encoding='utf-8') as file:
             payload = file.read()
             
-        # adds "=====" to the payload to mark the end of the message
-        payload += "====="
+        # adds "#####" to the payload to mark the end of the message
+        payload += "#####"
         # converts payload to binary using the binary func above
-        binary_msg = toBinary(payload)
+        binaryMessage = toBinary(payload)
         # calculates the length of the binary message
-        length = len(binary_msg)
+        length = len(binaryMessage)
         # check max length
-        max_length = sum(len(paragraph.text) for paragraph in document.paragraphs)
+        maxLength = sum(len(paragraph.text) for paragraph in document.paragraphs)
         # if the length exceeds then 'ValueError' will be raised
-        if length > max_length:
-            raise ValueError(f"Message length ({length}) exceeded {max_length}, please adjust the message or bit.")
-
+        if length > maxLength:
+            raise ValueError(f"[!] The message with length of ({length}) has exceeded the max length of {maxLength}, please change the message length or bit to change.")
+        # Initializes the index variable to 0
         index = 0
         # iterates over each paragraph in the document
         for paragraph in document.paragraphs:
@@ -61,7 +61,7 @@ class fontcolourSteganography:
                     run = paragraph.add_run(char)
                     # retrieve the appropriate bits from binary msg or the color values and modify them
                     for i in range(3):
-                        data = "".join(binary_msg[index:index+bit]) if index < length else color[i][-bit:]
+                        data = "".join(binaryMessage[index:index+bit]) if index < length else color[i][-bit:]
                         index += bit
                         color[i] = color[i][:-bit] + data
                     # sets the modified color using'RGBColor'
@@ -75,7 +75,7 @@ class fontcolourSteganography:
         # opens the Word document 
         document = Document(filePath)
         # initialize the variables
-        binary_msg = ""
+        binaryMessage = ""
         payload = ""
         # iterates over each paragraph in the document
         for paragraph in document.paragraphs:
@@ -87,15 +87,15 @@ class fontcolourSteganography:
                 # converts each color component to binary and appends the lsb to the binary msg
                 for color_component in run.font.color.rgb:
                     binary_color = toBinary(color_component)
-                    binary_msg += binary_color[-bit:]
+                    binaryMessage += binary_color[-bit:]
                     # if the length reaches 8 or more, converts the first 8 bits to a char and append to payload
-                    if len(binary_msg) >= 8:
-                        payload += chr(int(binary_msg[:8], 2))
+                    if len(binaryMessage) >= 8:
+                        payload += chr(int(binaryMessage[:8], 2))
                         # if payload ends with "======", breaks the loop as it is the end of the message
-                        if payload.endswith("====="):
+                        if payload.endswith("#####"):
                             break
                         # updates the binary message by removing first 8 bits
-                        binary_msg = binary_msg[8:]
+                        binaryMessage = binaryMessage[8:]
 
         # after processing all runs => writes payload to specified output file
         with open(outputFilePath, 'w', encoding='utf-8') as file:

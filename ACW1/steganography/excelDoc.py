@@ -34,10 +34,10 @@ class ExcelSteganography:
         # Calculates the length of the binary message
         length = len(binaryMessage)  
         # Calculates the maximum allowed length based on the sheet size and bit value
-        max_length = (self.sheet.max_row - 1) * self.sheet.max_column * bit  
+        maxLength = (self.sheet.max_row - 1) * self.sheet.max_column * bit  
         # Checks if the length of the message exceeds the maximum allowed length
-        if length > max_length:  
-            raise ValueError(f"[!] The message with length of ({length}) has exceeded the max length of {max_length}, please change the message length or bit to change.")
+        if length > maxLength:  
+            raise ValueError(f"[!] The message with length of ({length}) has exceeded the max length of {maxLength}, please change the message length or bit to change.")
         # Iterates over each row in the active sheet
         for row in self.sheet.iter_rows():  
             # If the index position exceeds the length of the message, breaks the loop
