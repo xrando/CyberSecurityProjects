@@ -139,15 +139,16 @@ class ExcelSteganography:
         # Utilizes the save method of the openpyxl workbook object to perform the actual saving operation.
         self.workbook.save(save_file_path)
 
-# initialize obj with the cover excel file
-obj = ExcelSteganography('files/cover.xlsx')
+if __name__ == "__main__":
+    # initialize obj with the cover excel file
+    obj = ExcelSteganography('files/cover.xlsx')
 
-# encode with the payload
-encoded_workbook = obj.encode_with_payload('files/payload.txt', 3)
+    # encode with the payload
+    encoded_workbook = obj.encode_with_payload('files/payload.txt', 3)
 
-# save the encoded file
-obj.save('files/encoded.xlsx')
+    # save the encoded file
+    obj.save('files/encoded.xlsx')
 
-# decode the encoded file
-decoded_msg = obj.decode(3)
-print(decoded_msg)
+    # decode the encoded file
+    decoded_msg = obj.decode(3)
+    print(decoded_msg)
