@@ -8,6 +8,9 @@ from resources.QAudioPlayer import AudioPlayer
 from steganography.Image import imgSteg
 from steganography.Utilities import read_file_content
 from steganography.Audio import audioSteg
+from steganography.txtDoc import WhitespaceSteganography
+from steganography.excelDoc import ExcelSteganography
+from steganography.wordDoc import HiddenTextSteganography
 import cv2, time, os, shutil, imageio
 
 
@@ -188,6 +191,15 @@ class DecodePage(QFrame):
           #     self.decodeFeedbackLabel.setText("No hidden message found.")
 
           elif encodedObjType in [".txt", ".xls", ".docx"]:
+              textS = WhitespaceSteganography()
+              excelS = ExcelSteganography()
+              docS = HiddenTextSteganography()
+
+              encoded_file_path = 'cover.docx'
+              output_file_path = 'decoded_payload.txt'
+              decoded_payload = textS.decode(encoded_file_path, output_file_path)
+
+
               
               # For document type decoding
               self.decodeFeedbackLabel.setText(f"Decoded Object: {filename}")
@@ -204,6 +216,7 @@ class DecodePage(QFrame):
               self.displayDocFileIcon()
               self.downloadDecodedButton.setVisible(True)
               pass
+
           else:
             self.decodeFeedbackLabel.setText("Invalid input.")
 
