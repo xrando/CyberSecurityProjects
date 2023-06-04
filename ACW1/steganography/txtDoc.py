@@ -62,14 +62,15 @@ class whitespaceSteganography:
         # Return the payload string
         return payload_string
 
+if __name__ == "__main__":
+    
+    # Create an instance of the whitespaceSteganography class
+    obj = whitespaceSteganography()
 
-# Create an instance of the whitespaceSteganography class
-obj = whitespaceSteganography()
+    # To encode
+    obj.hide_text_payload("files/cover.txt", "files/payloadtest.txt", "files/encoded.txt")
+    print("Text payload successfully hidden.")
 
-# To encode
-obj.hide_text_payload("cover.txt", "payloadtest.txt", "encoded.txt")
-print("Text payload successfully hidden.")
-
-# To decode
-payload = obj.extract_hidden_payload("encoded.txt")
-print("Text payload successfully extracted:", payload)
+    # To decode
+    payload = obj.extract_hidden_payload("files/encoded.txt")
+    print("Text payload successfully extracted:", payload)
