@@ -7,7 +7,9 @@ from resources.QAudioPlayer import AudioPlayer
 from steganography.Image import imgSteg
 from steganography.Utilities import read_file_content
 from steganography.Audio import audioSteg
-from steganography.wordDoc import fontcolourSteganography
+from steganography.wordDoc import HiddenTextSteganography
+from steganography.excelDoc import ExcelSteganography
+from steganography.txtDoc import WhitespaceSteganography
 import cv2, time, os, shutil, imageio
 
 class EncodePage(QFrame):
@@ -67,7 +69,7 @@ class EncodePage(QFrame):
     self.coverObjDraggable = DropFrame(coverFrame, 
       feedbackLabel = coverObjFeedbackText, 
       displayFileIcon = coverObjDisplayIcon,
-      allowedExtensions = [".txt", ".csv", ".docx", ".jpg", ".png", ".bmp", ".gif", ".mp3", ".mp4", ".wav"]
+      allowedExtensions = [".txt", ".xlsx", ".docx", ".jpg", ".png", ".bmp", ".gif", ".mp3", ".mp4", ".wav"]
     )
     self.coverObjDraggable.setFixedHeight(250)
 
@@ -175,31 +177,51 @@ class EncodePage(QFrame):
         self.downloadEncodedButton.setVisible(True)
 
       elif coverObjType in [".txt"]:
+        # For txt type encoding
+        filename = f"doc-{int(time.time())}{coverObjType}"
+        self.source_file_path = f"output/encoded/{filename}"
+
+        textS = WhitespaceSteganography()
+        textS.hide_text_payload(cover_file=coverObjPath, payload_file=payloadPath, output_file=self.source_file_path)
 
         # For document type encoding
-        self.encodeFeedbackLabel.setText(f"Encoded Object: doc-{int(time.time())}{coverObjType}")
+        self.displayDocFileIcon()
+        self.encodeFeedbackLabel.setText(f"Encoded Object: {filename}")        
         self.downloadEncodedButton.setVisible(True)
         pass
       elif coverObjType in [".docx"]:
-        # For document type encoding
+        # For docx type encoding
         filename = f"doc-{int(time.time())}{coverObjType}"
-        self.encodeFeedbackLabel.setText(f"Encoded Object: {filename}")
         self.source_file_path = f"output/encoded/{filename}"
 
         # Initialize the image steganography object
-        wordDocS = fontcolourSteganography()
+        wordDocS = HiddenTextSteganography()
 
         # Begin encoding the payload with cover object
-        encodedDocx = wordDocS.encode(filePath=coverObjPath, payload_file=payloadPath, bit=self.slider.value())
-        encodedDocx.save(self.source_file_path)
+        encodedDocx = wordDocS.encode(file_path=coverObjPath, payload_file=payloadPath, bit=self.slider.value())
         self.displayDocFileIcon()
+        self.encodeFeedbackLabel.setText(f"Encoded Object: {filename}")
         self.downloadEncodedButton.setVisible(True)
+      elif coverObjType in [".xlsx"]:
+        # For xlsx type encoding
+        filename = f"doc-{int(time.time())}{coverObjType}"
+        self.source_file_path = f"output/encoded/{filename}"
 
+        # initialize obj with the cover excel file
+        excelDocS = ExcelSteganography(coverObjPath)
+
+        # encode with the payload
+        excelDocS.encode_with_payload(payload_file_path = payloadPath, bit=self.slider.value())
+        excelDocS.save(self.source_file_path)
+        self.displayDocFileIcon()
+        self.encodeFeedbackLabel.setText(f"Encoded Object: {filename}")
+        self.downloadEncodedButton.setVisible(True)
 
       elif coverObjType in [".mp3", ".mp4", ".wav"]:
         # For audio type encoding
         filename = f"audio-{int(time.time())}{coverObjType}"
         self.source_file_path = f"output/encoded/{filename}"
+
         audioS = audioSteg()
         audioS.encode(audio_path=coverObjPath,output_path = self.source_file_path, payload_path=payloadPath, num_lsb = self.slider.value())
         self.mediaPlayerFeedback.setAudioPath(self.source_file_path)
@@ -207,11 +229,11 @@ class EncodePage(QFrame):
 
         self.encodeFeedbackLabel.setText(f"Encoded Object: {filename}")
         self.downloadEncodedButton.setVisible(True)
-        pass
       else:
         self.encodeFeedbackLabel.setText("Invalid input.")
 
     except Exception as e:
+      print(str(e))
       self.encodeFeedbackLabel.setText(str(e))
 
   def displayFeedbackImage(self):

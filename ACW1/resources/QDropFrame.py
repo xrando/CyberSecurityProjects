@@ -42,7 +42,7 @@ class DropFrame(QFrame):
     layout.setAlignment(Qt.AlignCenter)
 
     # Create download icon at the center of the dnd component
-    pixmap = QPixmap('./resources/image/download.png')
+    pixmap = QPixmap('./image/download.png')
     pixmap = pixmap.scaled(90, 60, Qt.AspectRatioMode.KeepAspectRatio)
     downloadIcon = QLabel("Drag and Drop Files Here", self)
     downloadIcon.setPixmap(pixmap)
