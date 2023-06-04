@@ -1,4 +1,4 @@
-class WhitespaceSteganography:
+class whitespaceSteganography:
     
     # Hides the payload text within the whitespace characters of the cover text file and 
     # writes the encoded text to the output file.
@@ -15,11 +15,17 @@ class WhitespaceSteganography:
         # Convert the payload to binary representation
         binary_payload = ''.join(format(ord(char), '08b') for char in payload_text)
 
+        # Check the length of the binary payload
+        payload_length = len(binary_payload)
+        max_length = len(cover_text) - cover_text.count(' ')  # Maximum available whitespace characters
+        if payload_length > max_length:
+            raise ValueError(f"Payload length ({payload_length}) exceeds the available whitespace length ({max_length}).")
+
         # Hide the binary payload within the whitespace characters of the cover text
         encoded_text = ""
         payload_index = 0
         for char in cover_text:
-            if char.isspace() and payload_index < len(binary_payload):
+            if char.isspace() and payload_index < payload_length:
                 # Replace whitespace characters with non-breaking space characters (U+00A0)
                 encoded_text += "\u00A0" if binary_payload[payload_index] == '1' else " "
                 payload_index += 1
@@ -33,7 +39,7 @@ class WhitespaceSteganography:
 
     # Extracts the hidden payload from the encoded file.
     # returns the extracted payload string
-    def extract_hidden_payload(self, encoded_file, output_file):
+    def extract_hidden_payload(self, encoded_file):
         
         # Read the encoded text from the file
         with open(encoded_file, 'r', encoding='utf-8') as file:
@@ -53,18 +59,17 @@ class WhitespaceSteganography:
         # Convert the payload bytes to a string
         payload_string = payload_bytes.decode('utf-8')
 
-        # Save the payload string to a text file
-        with open(output_file, 'w', encoding='utf-8') as file:
-            file.write(payload_string)
+        # Return the payload string
+        return payload_string
 
-if __name__ == "__main__":
-    # Create an instance of the WhitespaceSteganography class
-    obj = WhitespaceSteganography()
 
-    # To encode
-    obj.hide_text_payload("files/cover.txt", "files/payload.txt", "files/encoded.txt")
-    print("Text payload successfully hidden.")
+# Create an instance of the whitespaceSteganography class
+obj = whitespaceSteganography()
 
-    # To decode
-    payload = obj.extract_hidden_payload("files/encoded.txt")
-    print("Text payload successfully extracted:", payload)
+# To encode
+obj.hide_text_payload("cover.txt", "payloadtest.txt", "encoded.txt")
+print("Text payload successfully hidden.")
+
+# To decode
+payload = obj.extract_hidden_payload("encoded.txt")
+print("Text payload successfully extracted:", payload)
