@@ -65,7 +65,7 @@ class WhitespaceSteganography:
 if __name__ == "__main__":
     
     # Create an instance of the whitespaceSteganography class
-    obj = whitespaceSteganography()
+    obj = WhitespaceSteganography()
 
     # To encode
     obj.hide_text_payload("files/cover.txt", "files/payloadtest.txt", "files/encoded.txt")
