@@ -36,10 +36,9 @@ class WhitespaceSteganography:
         with open(output_file, 'w', encoding='utf-8') as file:
             file.write(encoded_text)
 
-
     # Extracts the hidden payload from the encoded file.
     # returns the extracted payload string
-    def extract_hidden_payload(self, encoded_file):
+    def extract_hidden_payload(self, encoded_file, output_file):
         
         # Read the encoded text from the file
         with open(encoded_file, 'r', encoding='utf-8') as file:
@@ -58,9 +57,10 @@ class WhitespaceSteganography:
 
         # Convert the payload bytes to a string
         payload_string = payload_bytes.decode('utf-8')
-
-        # Return the payload string
-        return payload_string
+    
+        # Write the encoded text to the output file
+        with open(output_file, 'w', encoding='utf-8') as file:
+            file.write(payload_string)
 
 if __name__ == "__main__":
     

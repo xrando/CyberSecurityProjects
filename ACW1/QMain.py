@@ -20,7 +20,7 @@ class MainWindow(QMainWindow):
     self.setWindowTitle("Steganography Application")
     self.setGeometry(uiPositionX, uiPositionY, uiWidth, uiHeight)
     self.setFixedSize(uiWidth, uiHeight)
-    self.setStyleSheet("background-color: #383838;");
+    self.setStyleSheet("background-color: #383838;")
 
     main_widget = QWidget(self)
     self.setCentralWidget(main_widget)
