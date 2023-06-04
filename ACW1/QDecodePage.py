@@ -161,9 +161,11 @@ class DecodePage(QFrame):
 
       elif encodedObjType in [".xlsx"]:
         # For excel document type decoding
-        excelS = ExcelSteganography(encodedObjPath)
-        excelS.decode(bit=self.slider.value())
-        excelS.save(self.source_file_path)
+        excelS = ExcelSteganography()
+        decoded_data = excelS.decode(file_path= encodedObjPath, bit=self.slider.value())
+
+        with open(self.source_file_path, 'w') as file:
+            file.write(decoded_data)
 
       elif encodedObjType in [".docx"]:
         # For word document type decoding

@@ -3,12 +3,6 @@ from openpyxl.styles import PatternFill
 import numpy as np
 
 class ExcelSteganography:
-    # initialize class instance for storing file path, loading workbook & setting active sheet
-    def __init__(self, file_path):
-        self.file_path = file_path
-        self.workbook = load_workbook(file_path)
-        self.sheet = self.workbook.active
-
     # converting the data to binary format as string
     # checks the type of the data and perform the conversion accordingly
     def toBinary(self, data):
@@ -24,7 +18,9 @@ class ExcelSteganography:
             raise TypeError("Type is not supported.")
     
     # encoding function
-    def encode(self, message, bit):
+    def encode(self, file_path, message, bit):
+        workbook = load_workbook(file_path)
+        sheet = workbook.active
         # Adds "#####" to the message to mark the end of the message
         message += "#####"  
         # Converts the message to binary using the 'toBinary' method
@@ -34,12 +30,12 @@ class ExcelSteganography:
         # Calculates the length of the binary message
         length = len(binaryMessage)  
         # Calculates the maximum allowed length based on the sheet size and bit value
-        maxLength = (self.sheet.max_row - 1) * self.sheet.max_column * bit  
+        maxLength = (sheet.max_row - 1) * sheet.max_column * bit  
         # Checks if the length of the message exceeds the maximum allowed length
         if length > maxLength:  
             raise ValueError(f"[!] The message with length of ({length}) has exceeded the max length of {maxLength}, please change the message length or bit to change.")
         # Iterates over each row in the active sheet
-        for row in self.sheet.iter_rows():  
+        for row in sheet.iter_rows():  
             # If the index position exceeds the length of the message, breaks the loop
             if index >= length:  
                 break
@@ -87,26 +83,28 @@ class ExcelSteganography:
                     break  
                 
         # Returns the modified workbook
-        return self.workbook  
+        return workbook  
 
     # encoding function with the payload
-    def encode_with_payload(self, payload_file_path, bit):
+    def encode_with_payload(self, file_path, payload_file_path, bit):
         # Opens the payload file in read mode
         with open(payload_file_path, 'r') as file:  
             # Reads the contents of the file and assigns it to the 'message' variable
             message = file.read()  
 
         # Calls the 'encode' method with the 'message' and 'bit' as arguments and returns the result
-        return self.encode(message, bit)  
+        return self.encode(file_path, message, bit)  
 
     # decoding function
-    def decode(self, bit):
+    def decode(self, file_path, bit):
+        workbook = load_workbook(file_path)
+        sheet = workbook.active
         # To store the binary representation of the hidden message
         binaryMessage = ""  
         # To store the decoded message
         decodedMessage = ""  
         # Iterates over each row in the active sheet
-        for row in self.sheet.iter_rows():  
+        for row in sheet.iter_rows():  
             # Iterates over each cell in the row
             for cell in row:  
                 # Retrieves the fill object of the cell
@@ -134,21 +132,13 @@ class ExcelSteganography:
                     # Removes the first 8 bits from 'binaryMessage' to process the next character
                     binaryMessage = binaryMessage[8:]  
 
-    # Saving the modified workbook to a specified file path. 
-    def save(self, save_file_path):
-        # Utilizes the save method of the openpyxl workbook object to perform the actual saving operation.
-        self.workbook.save(save_file_path)
-
 if __name__ == "__main__":
-    # initialize obj with the cover excel file
-    obj = ExcelSteganography('files/cover.xlsx')
+    obj = ExcelSteganography()
 
     # encode with the payload
-    encoded_workbook = obj.encode_with_payload('files/payload.txt', 3)
-
-    # save the encoded file
-    obj.save('files/encoded.xlsx')
+    encoded_workbook = obj.encode_with_payload('files/cover.xlsx', 'files/payload.txt', 3)
+    encoded_workbook.save('files/encoded.xlsx')
 
     # decode the encoded file
-    decoded_msg = obj.decode(3)
+    decoded_msg = obj.decode('files/encoded.xlsx', 3)
     print(decoded_msg)

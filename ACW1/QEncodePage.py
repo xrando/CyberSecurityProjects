@@ -206,16 +206,17 @@ class EncodePage(QFrame):
         self.encodeFeedbackLabel.setText(f"Encoded Object: {filename}")
         self.downloadEncodedButton.setVisible(True)
       elif coverObjType in [".xlsx"]:
-        # For xlsx type encoding
+        # For excel document type encoding
         filename = f"doc-{int(time.time())}{coverObjType}"
         self.source_file_path = f"output/encoded/{filename}"
 
         # initialize obj with the cover excel file
-        excelDocS = ExcelSteganography(coverObjPath)
+        excelDocS = ExcelSteganography()
 
         # encode with the payload
-        excelDocS.encode_with_payload(payload_file_path = payloadPath, bit=self.slider.value())
-        excelDocS.save(self.source_file_path)
+        encodedWorkbook = excelDocS.encode_with_payload(file_path=coverObjPath, payload_file_path = payloadPath, bit=self.slider.value())
+        encodedWorkbook.save(self.source_file_path)
+        
         self.displayDocFileIcon()
         self.encodeFeedbackLabel.setText(f"Encoded Object: {filename}")
         self.downloadEncodedButton.setVisible(True)
