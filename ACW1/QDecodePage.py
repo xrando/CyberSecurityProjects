@@ -46,8 +46,10 @@ class DecodePage(QFrame):
     self.encodedObjDraggable = DropFrame(contentFrame, 
       feedbackLabel = encodedObjFeedbackText, 
       displayFileIcon = encodedObjDisplayIcon,
-      allowedExtensions = [".txt", ".csv", ".docx", ".jpg", ".png", ".bmp", ".gif", ".mp3", ".mp4", ".wav"]
+      allowedExtensions = [".txt", ".xlsx", ".docx", ".jpg", ".png", ".bmp", ".gif", ".mp3", ".mp4", ".wav"],
+      noLSB = [".txt",".docx"]
     )
+    self.encodedObjDraggable.enableSlider.connect(self.enableSlider)
     self.encodedObjDraggable.setFixedHeight(250)
 
     contentFrameLayout.addWidget(self.encodedObjDraggable)
@@ -60,20 +62,20 @@ class DecodePage(QFrame):
     sideFrameLayout.setAlignment(Qt.AlignTop)
     sideFrameLayout.setContentsMargins(30,10,30,10)
 
-    sliderLabel = QLabel("SELECT LSB", sideFrame, styleSheet="font-size:20px;font-weight:bold;font-family:Arial,sans-serif;")
+    self.sliderLabel = QLabel("SELECT LSB", sideFrame, styleSheet="font-size:20px;font-weight:bold;font-family:Arial,sans-serif;")
 
     self.slider = QSlider(Qt.Horizontal)
     self.slider.setRange(1, 6)  # Set the range from 0 to 5 (6 options)
     self.slider.setTickInterval(1)  # Set the tick interval to 1
     self.slider.setTickPosition(QSlider.TicksBelow)  # Show ticks below the slider
 
-    label = QLabel("1",styleSheet="font-size:28px;font-weight:bold;font-family:Arial,sans-serif;")
+    self.sliderValue = QLabel("1",styleSheet="font-size:28px;font-weight:bold;font-family:Arial,sans-serif;")
 
-    self.slider.valueChanged.connect(lambda value: label.setText(f"{value}"))
+    self.slider.valueChanged.connect(lambda value: self.sliderValue.setText(f"{value}"))
 
     slider_layout = QHBoxLayout()
     slider_layout.addWidget(self.slider)
-    slider_layout.addWidget(label)
+    slider_layout.addWidget(self.sliderValue)
 
     decodeButton = CustomButton("DECODE", sideFrame)
     decodeButton.clicked.connect(self.decodeFile)
@@ -89,7 +91,7 @@ class DecodePage(QFrame):
     # Show the main window
     self.mediaPlayerFeedback.hide()
 
-    sideFrameLayout.addWidget(sliderLabel)
+    sideFrameLayout.addWidget(self.sliderLabel)
     sideFrameLayout.addLayout(slider_layout)
     sideFrameLayout.addSpacing(20)
     sideFrameLayout.addWidget(decodeButton)
@@ -126,75 +128,64 @@ class DecodePage(QFrame):
 
 
   def decodeFile(self):
-      try:
-          self.resetFeedback()
-          encodedObjPath, encodedObjType = self.encodedObjDraggable.value
+    try:
+      self.resetFeedback()
+      encodedObjPath, encodedObjType = self.encodedObjDraggable.value
 
-          if encodedObjPath is None or encodedObjType is None:
-              self.decodeFeedbackLabel.setText("Invalid input.")
-              return
+      if encodedObjPath is None or encodedObjType is None:
+          self.decodeFeedbackLabel.setText("Invalid input.")
+          return
 
-          filename = f"decodedmsg-{int(time.time())}.txt"
-          self.source_file_path = f"output/decoded/{filename}"
+      filename = f"decodedmsg-{int(time.time())}.txt"
+      self.source_file_path = f"output/decoded/{filename}"
 
-          if encodedObjType in [".jpg", ".bmp", ".png", ".gif"]:
-            # Initialize the image steganography object
-            imgS = imgSteg()
+      if encodedObjType in [".jpg", ".bmp", ".png", ".gif"]:
+        # Initialize the image steganography object
+        imgS = imgSteg()
 
-            # Begin decoding the object
-            decoded_data = imgS.decode(img=encodedObjPath, bits=self.slider.value())
+        # Begin decoding the object
+        decoded_data = imgS.decode(img=encodedObjPath, bits=self.slider.value())
 
-            if decoded_data is not None:
-              with open(self.source_file_path, 'w') as file:
-                file.write(decoded_data)
-              self.decodeFeedbackLabel.setText(f"Decoded Object: {filename}")
-              self.displayDocFileIcon()
-              self.downloadDecodedButton.setVisible(True)
-            else:
-              self.decodeFeedbackLabel.setText("No hidden message found.")
+        if decoded_data is not None:
+          with open(self.source_file_path, 'w') as file:
+            file.write(decoded_data)
 
-          elif encodedObjType in [".txt", ".xls", ".docx"]:
-              textS = WhitespaceSteganography()
-              excelS = ExcelSteganography()
-              docS = HiddenTextSteganography()
+        else:
+          self.decodeFeedbackLabel.setText("No hidden message found.")
+          return
 
-              encoded_file_path = 'cover.docx'
-              output_file_path = 'decoded_payload.txt'
-              decoded_payload = textS.decode(encoded_file_path, output_file_path)
+      elif encodedObjType in [".txt"]:
+        # For text document type decoding
+        textS = WhitespaceSteganography()
+        textS.extract_hidden_payload(encoded_file= encodedObjPath, output_file= self.source_file_path)
 
+      elif encodedObjType in [".xlsx"]:
+        # For excel document type decoding
+        excelS = ExcelSteganography(encodedObjPath)
+        excelS.decode(bit=self.slider.value())
+        excelS.save(self.source_file_path)
 
-              
-              # For document type decoding
-              self.decodeFeedbackLabel.setText(f"Decoded Object: {filename}")
-              # self.decodeFeedbackLabel.setText("Decoding document type is not supported.")
-              self.downloadDecodedButton.setVisible(True)
-              pass
-                     
-          elif encodedObjType in [".mp3", ".mp4", ".wav"]:
-              audioS = audioSteg()
-              # audioS.encode(audio_path=encodedObjPath,output_path = self.source_file_path, payload_path=payloadPath, num_lsb = self.slider.value())
-              audioS.decode(audio_path=encodedObjPath, output_path=self.source_file_path, num_lsb=self.slider.value())
+      elif encodedObjType in [".docx"]:
+        # For word document type decoding
+        docS = HiddenTextSteganography()
+        docS.decode(file_path=encodedObjPath, output_file_path=self.source_file_path)
+                
+      elif encodedObjType in [".mp3", ".mp4", ".wav"]:
+        # For audio type decoding
+        audioS = audioSteg()
+        audioS.decode(audio_path=encodedObjPath, output_path=self.source_file_path, num_lsb=self.slider.value())
 
-              self.decodeFeedbackLabel.setText(f"Decoded Object: {filename}")
-              self.displayDocFileIcon()
-              self.downloadDecodedButton.setVisible(True)
-          else:
-            self.decodeFeedbackLabel.setText("Invalid input.")
+      else:
+        self.decodeFeedbackLabel.setText("Decoding document type is not supported.")
+        return
+      
+      self.displayDocFileIcon()
+      self.decodeFeedbackLabel.setText(f"Decoded Object: {filename}")
+      self.downloadDecodedButton.setVisible(True)
 
-          #     audioS = audioSteg()
-          #     decoded_message = audioS.decode(audio_path=sourceObjPath)
-
-          #     if decoded_message is not None:
-          #         self.decodeFeedbackLabel.setText("Decoded Message:")
-          #         self.displayDecodedText(decoded_message)
-          #     else:
-          #         self.decodeFeedbackLabel.setText("No hidden message found.")
-
-          # else:
-          #     self.decodeFeedbackLabel.setText("Invalid input.")
-
-      except Exception as e:
-          self.decodeFeedbackLabel.setText(str(e))
+    except Exception as e:
+      print(str(e))
+      self.decodeFeedbackLabel.setText(str(e))
 
   def displayFeedbackImage(self):
     # Load the decoded image using imageio
@@ -230,3 +221,14 @@ class DecodePage(QFrame):
     self.decodeFeedbackImage.clear()
     self.decodeFeedbackImage.setVisible(False)
     self.downloadDecodedButton.setVisible(False)
+
+  def enableSlider(self, enabled):
+    self.slider.setEnabled(enabled)
+    if enabled:
+      self.sliderLabel.setText("SELECT LSB")
+      self.sliderLabel.setStyleSheet("color:black;font-size:20px;font-weight:bold;font-family:Arial,sans-serif;")
+      self.sliderValue.setStyleSheet("color:black;font-size:28px;font-weight:bold;font-family:Arial,sans-serif;")
+    else:
+      self.sliderLabel.setText("SELECT LSB (DISABLED)")
+      self.sliderLabel.setStyleSheet("color:grey;font-size:20px;font-weight:bold;font-family:Arial,sans-serif;")
+      self.sliderValue.setStyleSheet("color:grey;font-size:28px;font-weight:bold;font-family:Arial,sans-serif;")

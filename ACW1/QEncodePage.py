@@ -69,8 +69,10 @@ class EncodePage(QFrame):
     self.coverObjDraggable = DropFrame(coverFrame, 
       feedbackLabel = coverObjFeedbackText, 
       displayFileIcon = coverObjDisplayIcon,
-      allowedExtensions = [".txt", ".xlsx", ".docx", ".jpg", ".png", ".bmp", ".gif", ".mp3", ".mp4", ".wav"]
+      allowedExtensions = [".txt", ".xlsx", ".docx", ".jpg", ".png", ".bmp", ".gif", ".mp3", ".mp4", ".wav"],
+      noLSB = [".txt",".docx"]
     )
+    self.coverObjDraggable.enableSlider.connect(self.enableSlider)
     self.coverObjDraggable.setFixedHeight(250)
 
     coverFrameLayout.addWidget(self.coverObjDraggable)
@@ -83,20 +85,20 @@ class EncodePage(QFrame):
     sideFrameLayout.setAlignment(Qt.AlignTop)
     sideFrameLayout.setContentsMargins(30,10,30,10)
 
-    sliderLabel = QLabel("SELECT LSB", sideFrame, styleSheet="font-size:20px;font-weight:bold;font-family:Arial,sans-serif;")
+    self.sliderLabel = QLabel("SELECT LSB", sideFrame, styleSheet="font-size:20px;font-weight:bold;font-family:Arial,sans-serif;")
 
     self.slider = QSlider(Qt.Horizontal)
     self.slider.setRange(1, 6)  # Set the range from 0 to 5 (6 options)
     self.slider.setTickInterval(1)  # Set the tick interval to 1
     self.slider.setTickPosition(QSlider.TicksBelow)  # Show ticks below the slider
 
-    sliderValue = QLabel("1",styleSheet="font-size:28px;font-weight:bold;font-family:Arial,sans-serif;")
+    self.sliderValue = QLabel("1",styleSheet="font-size:28px;font-weight:bold;font-family:Arial,sans-serif;")
 
-    self.slider.valueChanged.connect(lambda value: sliderValue.setText(f"{value}"))
+    self.slider.valueChanged.connect(lambda value: self.sliderValue.setText(f"{value}"))
 
     slider_layout = QHBoxLayout()
     slider_layout.addWidget(self.slider)
-    slider_layout.addWidget(sliderValue)
+    slider_layout.addWidget(self.sliderValue)
     
     encodeButton = CustomButton("ENCODE", sideFrame)
     encodeButton.clicked.connect(self.encodeFile)
@@ -112,7 +114,7 @@ class EncodePage(QFrame):
     # Show the main window
     self.mediaPlayerFeedback.hide()
 
-    sideFrameLayout.addWidget(sliderLabel)
+    sideFrameLayout.addWidget(self.sliderLabel)
     sideFrameLayout.addLayout(slider_layout)
     sideFrameLayout.addSpacing(20)
     sideFrameLayout.addWidget(encodeButton)
@@ -198,7 +200,8 @@ class EncodePage(QFrame):
         wordDocS = HiddenTextSteganography()
 
         # Begin encoding the payload with cover object
-        encodedDocx = wordDocS.encode(file_path=coverObjPath, payload_file=payloadPath, bit=self.slider.value())
+        wordDocS.encode(file_path=coverObjPath, payload_file=payloadPath, save_file_path=self.source_file_path)
+
         self.displayDocFileIcon()
         self.encodeFeedbackLabel.setText(f"Encoded Object: {filename}")
         self.downloadEncodedButton.setVisible(True)
@@ -274,5 +277,19 @@ class EncodePage(QFrame):
     self.downloadEncodedButton.setVisible(False)
     self.mediaPlayerFeedback.stop_audio()
     self.mediaPlayerFeedback.hide()
+  
+  def enableSlider(self, enabled):
+    print("enable?", enabled)
+    self.slider.setEnabled(enabled)
+    if enabled:
+      self.sliderLabel.setText("SELECT LSB")
+      self.sliderLabel.setStyleSheet("color:black;font-size:20px;font-weight:bold;font-family:Arial,sans-serif;")
+      self.sliderValue.setStyleSheet("color:black;font-size:28px;font-weight:bold;font-family:Arial,sans-serif;")
+    else:
+      self.sliderLabel.setText("SELECT LSB (DISABLED)")
+      self.sliderLabel.setStyleSheet("color:grey;font-size:20px;font-weight:bold;font-family:Arial,sans-serif;")
+      self.sliderValue.setStyleSheet("color:grey;font-size:28px;font-weight:bold;font-family:Arial,sans-serif;")
+    
+    
 
 

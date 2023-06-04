@@ -18,13 +18,16 @@ frameEnterStyle = ("#DropFrame{"+
 )
 
 class DropFrame(QFrame):
-  dropEventTriggered = pyqtSignal(str, bool)  # Define a custom signal
-  def __init__(self, parent=None, feedbackLabel=None, displayFileIcon=None, allowedExtensions=[".txt", ".csv", ".docx", ".png"]):
+  # Define a signal
+  enableSlider = pyqtSignal(bool)
+
+  def __init__(self, parent=None, feedbackLabel=None, displayFileIcon=None, allowedExtensions=[], noLSB=None):
     super().__init__(parent)
 
     self.feedbackLabel = feedbackLabel
     self.displayFileIcon = displayFileIcon
     self.allowedExtensions = allowedExtensions
+    self.noLSB = noLSB
     self.value = None, None # file_path, file_type
 
     self.setObjectName("DropFrame")
@@ -42,7 +45,7 @@ class DropFrame(QFrame):
     layout.setAlignment(Qt.AlignCenter)
 
     # Create download icon at the center of the dnd component
-    pixmap = QPixmap('./image/download.png')
+    pixmap = QPixmap('./resources/image/download.png')
     pixmap = pixmap.scaled(90, 60, Qt.AspectRatioMode.KeepAspectRatio)
     downloadIcon = QLabel("Drag and Drop Files Here", self)
     downloadIcon.setPixmap(pixmap)
@@ -116,6 +119,8 @@ class DropFrame(QFrame):
       pixmap = pixmap.scaled(64, 64, Qt.AspectRatioMode.KeepAspectRatio)
       self.displayFileIcon.setPixmap(pixmap)
       self.value = file_path, file_extension # file_path, file_type
+
+      self.enableSlider.emit(self.noLSB is None or file_extension not in self.noLSB)
       return True
     else:       
       self.setStyleSheet(dropFrameStyle)
