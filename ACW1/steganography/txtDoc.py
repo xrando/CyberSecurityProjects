@@ -1,4 +1,4 @@
-class whitespaceSteganography:
+class WhitespaceSteganography:
     
     # Hides the payload text within the whitespace characters of the cover text file and 
     # writes the encoded text to the output file.
