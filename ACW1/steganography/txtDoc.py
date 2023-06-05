@@ -48,8 +48,10 @@ class WhitespaceSteganography:
         binary_payload = ""
         for char in encoded_text:
             if char == '\u00A0':
+                # non-breaking spaces
                 binary_payload += '1'
             elif char == ' ':
+                # spaces
                 binary_payload += '0'
 
         # Convert the binary payload to bytes

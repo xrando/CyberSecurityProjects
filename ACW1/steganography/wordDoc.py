@@ -46,13 +46,13 @@ if __name__ == "__main__":
     obj = HiddenTextSteganography()
 
     # Specify the encoding file path
-    encode_file_path = 'cover.docx'
+    encode_file_path = 'files/cover.docx'
 
     # Specify the payload content
-    payload_file = 'longpayload.txt'
+    payload_file = 'files/longpayload.txt'
 
     # Specify the save file path
-    save_file_path = 'encoded_payload.docx'
+    save_file_path = 'files/encoded_payload.docx'
 
     # Using the encode method and save the modified document
     encoded_file_path = obj.encode(encode_file_path, payload_file, save_file_path)
@@ -61,7 +61,7 @@ if __name__ == "__main__":
     print("Encoded file:", encoded_file_path)
 
     # Specify the output file path
-    output_file_path = 'decoded_payload.txt'
+    output_file_path = 'files/decoded_payload.txt'
 
     # Using the decode method and save the decoded payload to the output file
     decoded_payload = obj.decode(encoded_file_path, output_file_path)
